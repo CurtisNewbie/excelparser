@@ -1,6 +1,6 @@
 # excelparser
 
-Simple excel parser written in python, it's essentially a wrapper of Panda, openpyxl.
+Simple excel parser written in python, it's essentially a wrapper of Panda, openpyxl. Supports csv, xls, xlsx.
 
 ### Example
 
