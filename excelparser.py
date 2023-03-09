@@ -38,9 +38,21 @@ class ExcelParser():
 
     def getcol(self, col_name: str, row_idx: int) -> str:
         colidx = self.lookupcol(col_name)
-        if colidx == -1:
-            return ""
+        if colidx == -1: return ""
         return self.rows[row_idx][colidx]
+    
+    def joincol(self, col_name: str, delimiter: str = ",", wrap_each = None) -> str:
+        idx = self.lookupcol(col_name)
+        if idx == -1: return "" 
+
+        joined  = ""
+        for i in range(len(self.rows)):
+            v = self.rows[i][idx]
+            if wrap_each != None: v = wrap_each(v)
+            joined += v
+            if i < len(self.rows) - 1:
+                joined += delimiter
+        return joined
 
     def sumgroup(self, col_name: str, summed_col: str) -> dict[str]:
         grouped: dict[str][float] = {}
