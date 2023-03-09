@@ -18,7 +18,7 @@ def debug(callback: Callable[[], str]):
 class ExcelParser():
 
     def __init__(self, inputf=None) -> None:
-        self.inputf = inputf
+        self.inputf: str = inputf
         self.cols: list[str] = None
         self.rows: list[list[any]] = None
         self.cols_idx: dict[str][int] = None
@@ -103,10 +103,7 @@ class ExcelParser():
         df.to_excel(outf, index=False)
 
     def parse(self):
-        '''
-        Parse excel
-        '''
-        ip = self.inputf
+        ip: str = self.inputf
         if ip == None:
             raise ValueError("Please specify input file")
         debug(lambda: f"input path: '{ip}'")
@@ -115,7 +112,11 @@ class ExcelParser():
         if not exists(ip):
             raise ValueError(f"Input file '{ip}' not found")
 
-        df: pandas.DataFrame = pandas.read_excel(ip, 0, dtype="string")
+        df: pandas.DataFrame 
+        if ip.lower().endswith('.csv'):
+            df = pandas.read_csv(ip, 0, dtype="string")  
+        else: 
+            df = pandas.read_excel(ip, 0, dtype="string") 
         # debug(lambda: f"opened workbook '{ip}', content: '{df}'")
 
         nrow = len(df)
