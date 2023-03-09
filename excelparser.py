@@ -42,6 +42,42 @@ class ExcelParser():
             return ""
         return self.rows[row_idx][colidx]
 
+    def sumgroup(self, col_name: str, summed_col: str) -> dict[str]:
+        grouped: dict[str][float] = {}
+        grpidx = self.lookupcol(col_name)
+        if grpidx == -1: return grouped 
+        sumidx = self.lookupcol(summed_col)
+        if sumidx == -1: return grouped 
+
+        for i in range(len(self.rows)):
+            k = self.rows[i][grpidx]
+            if k not in grouped:
+                grouped[k] = 0
+
+            v = self.rows[i][sumidx]
+            if v == "":
+                v = 0
+            else:
+                v = float(v)
+            grouped[k] += v
+
+        return grouped 
+
+    def sumcol(self, col_name: str) -> float:
+        colidx = self.lookupcol(col_name)
+        if colidx == -1:
+            return 0
+
+        sum = 0
+        for i in range(len(self.rows)):
+            v = self.rows[i][colidx]
+            if v == "":
+                v = 0
+            else:
+                v = float(v)
+            sum += v
+        return sum
+
     def lookupcol(self, col_name: int) -> int:
         '''
         Find column index by name
