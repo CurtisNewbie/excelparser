@@ -138,7 +138,7 @@ class ExcelParser():
         df = pandas.DataFrame(self.rows, columns=self.cols)
         df.to_excel(outf, index=False)
 
-    def parse(self):
+    def parse(self) -> "ExcelParser":
         ip: str = self.inputf
         if ip == None:
             raise ValueError("Please specify input file")
@@ -197,4 +197,12 @@ class ExcelParser():
 
         self.cols = cols
         self.rows = rows
+        return self
 
+    def __str__(self) -> str:
+        s = f"_File: '{self.inputf}'"
+        s += "\n_Columns: " + str(self.cols)
+        s += "\n_Rows: "
+        for i in range(len(self.rows)):
+            s += "\n" + str(self.rows[i])
+        return s
