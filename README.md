@@ -2,6 +2,8 @@
 
 Simple excel parser written in python, it's essentially a wrapper of Panda, openpyxl. Supports csv, xls, xlsx.
 
+To install it, simply run `python3 -m pip install .`.
+
 ### Example
 
 ```py
