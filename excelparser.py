@@ -2,14 +2,6 @@ from genericpath import exists
 from typing import Callable
 import pandas
 
-'''
-python3 -m pip install pandas openpyxl 
-
-(openpyxl is optional, it's used for *.xlsx files)
-
-Yongj.Zhuang
-'''
-
 isdebug = False
 def debug(callback: Callable[[], str]):
     if isdebug: print("[debug] " + callback())
@@ -19,31 +11,87 @@ class ExcelParser():
 
     def __init__(self, inputf=None) -> None:
         self.inputf: str = inputf
-        self.cols: list[str] = None
-        self.rows: list[list[any]] = None
-        self.cols_idx: dict[str][int] = None
+        self.cols: list[str] = []
+        self.rows: list[list[any]] = []
+        self.cols_idx: dict[str][int] = {}
 
     def append_row(self, row: list[any]):
+        '''
+        Append row
+        '''
         diff = len(self.cols) - len(row)
         if diff > 0:
-            for i in range(diff):
-                row.append("")
+            for i in range(diff): row.append("")
         self.rows.append(row)
 
+    def flatten_col(self, col_name: str) -> list[str]:
+        '''
+        Get all values of the specified column as a list
+        '''
+        colidx = self.lookupcol(col_name)
+        if colidx == -1: return []
+        l = []
+        for r in self.rows: l.append(r[colidx])
+        return l
+
+    def flatten_all(self) -> list[str]:
+        '''
+        Get all values of cols and rows as a list
+        '''
+        l = []
+        for c in self.cols: l.append(c)
+        for r in self.rows:
+            for v in r: l.append(v)
+        return l
+
+    def flatten_rows(self) -> list[str]:
+        '''
+        Get all values of rows as a list
+        '''
+        l = []
+        for r in self.rows:
+            for v in r: l.append(v)
+        return l
+
     def append_empty_row(self):
+        '''
+        Append empty row
+        '''
         self.append_row([])
 
     def row_count(self) -> int:
+        '''
+        Return len(rows)
+        '''
         return len(self.rows)
 
     def getcol(self, col_name: str, row_idx: int) -> str:
+        '''
+        Get column value for the row
+        '''
         colidx = self.lookupcol(col_name)
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
-    
-    def joincol(self, col_name: str, delimiter: str = ",", wrap_each = None) -> str:
+
+    def appendcol(self, col_name: str):
+        '''
+        Append a new column at the end
+        '''
+        self.cols.append(col_name)
+        self.cols_idx[col_name] = self.cols[len(self.cols) - 1]
+
+    def quote_join_col(self, col_name: str, delimiter: str = ",") -> str:
+        '''
+        Join column values with the delimiter, and wrap each value with single quote
+        '''
+        return self.join_col(col_name, delimiter, quote)
+
+    def join_col(self, col_name: str, delimiter: str = ",", wrap_each = None) -> str:
+        '''
+        Join column values with the delimiter, and wrap each value if necessary
+        '''
         idx = self.lookupcol(col_name)
-        if idx == -1: return "" 
+        if idx == -1: return ""
 
         joined  = ""
         for i in range(len(self.rows)):
@@ -54,12 +102,15 @@ class ExcelParser():
                 joined += delimiter
         return joined
 
-    def sumgroup(self, col_name: str, summed_col: str) -> dict[str]:
+    def group_and_sum(self, col_name: str, summed_col: str) -> dict[str]:
+        '''
+        Group and sum values of the specified column
+        '''
         grouped: dict[str][float] = {}
         grpidx = self.lookupcol(col_name)
-        if grpidx == -1: return grouped 
+        if grpidx == -1: return grouped
         sumidx = self.lookupcol(summed_col)
-        if sumidx == -1: return grouped 
+        if sumidx == -1: return grouped
 
         for i in range(len(self.rows)):
             k = self.rows[i][grpidx]
@@ -73,9 +124,12 @@ class ExcelParser():
                 v = float(v)
             grouped[k] += v
 
-        return grouped 
+        return grouped
 
-    def sumcol(self, col_name: str) -> float:
+    def sum_col(self, col_name: str) -> float:
+        '''
+        Sum values of column
+        '''
         colidx = self.lookupcol(col_name)
         if colidx == -1:
             return 0
@@ -90,7 +144,7 @@ class ExcelParser():
             sum += v
         return sum
 
-    def lookupcol(self, col_name: int) -> int:
+    def lookup_col(self, col_name: int) -> int:
         '''
         Find column index by name
         '''
@@ -101,7 +155,7 @@ class ExcelParser():
 
     def cvt_col_name(self, col_name: int, converter):
         '''
-        Convert column value 
+        Convert column value
         '''
         colidx = self.lookupcol(col_name)
         if colidx == -1:
@@ -118,7 +172,7 @@ class ExcelParser():
 
     def copy_col_name(self, copied_names: list[int]) -> "ExcelParser":
         '''
-        Copy columns 
+        Copy columns
         '''
         colnames = []
         idxls: list[int] = []
@@ -151,21 +205,19 @@ class ExcelParser():
         df.to_excel(outf, index=False)
 
     def parse(self) -> "ExcelParser":
+        '''
+        Parse file
+        '''
         ip: str = self.inputf
-        if ip == None:
-            raise ValueError("Please specify input file")
+        if ip == None: raise ValueError("Please specify input file")
         debug(lambda: f"input path: '{ip}'")
 
         # read and parse workbook
-        if not exists(ip):
-            raise ValueError(f"Input file '{ip}' not found")
+        if not exists(ip): raise ValueError(f"Input file '{ip}' not found")
 
-        df: pandas.DataFrame 
-        if ip.lower().endswith('.csv'):
-            df = pandas.read_csv(ip, 0, dtype="string")  
-        else: 
-            df = pandas.read_excel(ip, 0, dtype="string") 
-        # debug(lambda: f"opened workbook '{ip}', content: '{df}'")
+        df: pandas.DataFrame
+        if ip.lower().endswith('.csv'): df = pandas.read_csv(ip, 0, dtype="string")
+        else: df = pandas.read_excel(ip, 0, dtype="string")
 
         nrow = len(df)
         ncol = len(df.columns)
@@ -218,3 +270,12 @@ class ExcelParser():
         for i in range(len(self.rows)):
             s += "\n" + str(self.rows[i])
         return s
+
+def quote_each(l: list[str]) -> list[str]:
+    return [quote(v) for v in l]
+
+def quote(s: str) -> str:
+    return "'" + s + "'"
+
+def parse(f: str) -> ExcelParser:
+    return ExcelParser(f).parse()

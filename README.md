@@ -9,8 +9,8 @@ To install it, simply run `python3 -m pip install .`.
 ```py
 import excelparser
 
-ep = excelparser.ExcelParser('/some/dir/yourfile.xlsx')
-ep.parse()
+# parse the xlsx file
+ep = excelparser.parse('/some/dir/yourfile.xlsx')
 
 # convert column value
 ep.cvt_col_name('amount', lambda x: 0 if x == "" else float(x) * 1000)
