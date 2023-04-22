@@ -1,0 +1,17 @@
+[project]
+name = "excelparser"
+description = "Simple parser for reading / writing csv, xls, xlsx files"
+version = "0.0.1"
+authors = [
+    { name = "yongj.zhuang" }
+]
+dependencies = [
+    "pandas",
+    "openpyxl"
+]
+
+[project.optional-dependencies]
+dev = [ ]
+
+[build-system]
+requires = ["setuptools", "wheel"]
