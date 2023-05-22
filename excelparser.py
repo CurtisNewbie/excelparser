@@ -73,6 +73,12 @@ class ExcelParser():
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
 
+    def filter_rows(self, filter):
+        newrow: list[list[any]] = []
+        for r in self.rows:
+            if not filter(r): newrow.append(r)
+        self.rows = newrow
+
     def appendcol(self, col_name: str):
         '''
         Append a new column at the end
