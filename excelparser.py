@@ -77,8 +77,15 @@ class ExcelParser():
         '''
         Append a new column at the end
         '''
+        self.appendcolval(col_name, lambda : "")
+
+    def appendcolval(self, col_name: str, value_supplier):
+        '''
+        Append a new column at the end
+        '''
         self.cols.append(col_name)
         self.cols_idx[col_name] = len(self.cols) - 1
+        for r in self.rows: r.append(value_supplier())
 
     def quote_join_col(self, col_name: str, delimiter: str = ",") -> str:
         '''
