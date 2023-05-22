@@ -78,7 +78,7 @@ class ExcelParser():
         Append a new column at the end
         '''
         self.cols.append(col_name)
-        self.cols_idx[col_name] = self.cols[len(self.cols) - 1]
+        self.cols_idx[col_name] = len(self.cols) - 1
 
     def quote_join_col(self, col_name: str, delimiter: str = ",") -> str:
         '''
