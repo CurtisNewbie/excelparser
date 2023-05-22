@@ -28,7 +28,7 @@ class ExcelParser():
         '''
         Get all values of the specified column as a list
         '''
-        colidx = self.lookupcol(col_name)
+        colidx = self.lookup_col(col_name)
         if colidx == -1: return []
         l = []
         for r in self.rows: l.append(r[colidx])
@@ -69,7 +69,7 @@ class ExcelParser():
         '''
         Get column value for the row
         '''
-        colidx = self.lookupcol(col_name)
+        colidx = self.lookup_col(col_name)
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
 
@@ -90,7 +90,7 @@ class ExcelParser():
         '''
         Join column values with the delimiter, and wrap each value if necessary
         '''
-        idx = self.lookupcol(col_name)
+        idx = self.lookup_col(col_name)
         if idx == -1: return ""
 
         joined  = ""
@@ -107,9 +107,9 @@ class ExcelParser():
         Group and sum values of the specified column
         '''
         grouped: dict[str][float] = {}
-        grpidx = self.lookupcol(col_name)
+        grpidx = self.lookup_col(col_name)
         if grpidx == -1: return grouped
-        sumidx = self.lookupcol(summed_col)
+        sumidx = self.lookup_col(summed_col)
         if sumidx == -1: return grouped
 
         for i in range(len(self.rows)):
@@ -130,7 +130,7 @@ class ExcelParser():
         '''
         Sum values of column
         '''
-        colidx = self.lookupcol(col_name)
+        colidx = self.lookup_col(col_name)
         if colidx == -1:
             return 0
 
@@ -157,7 +157,7 @@ class ExcelParser():
         '''
         Convert column value
         '''
-        colidx = self.lookupcol(col_name)
+        colidx = self.lookup_col(col_name)
         if colidx == -1:
             raise ValueError(
                 f"Unable to find '{col_name}', available columns are: {self.cols}")
@@ -178,7 +178,7 @@ class ExcelParser():
         idxls: list[int] = []
 
         for i in range(len(copied_names)):
-            idx = self.lookupcol(copied_names[i])
+            idx = self.lookup_col(copied_names[i])
             if idx > -1:
                 colnames.append(copied_names[i])
                 idxls.append(idx)
