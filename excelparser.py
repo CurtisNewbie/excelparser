@@ -157,6 +157,14 @@ class ExcelParser():
             sum += v
         return sum
 
+    def row_lookup_col(self, col_name: str, row: list[str]) -> str:
+        '''
+        Find column value in row by name
+        '''
+        i = self.lookup_col(col_name)
+        if i < 0: return ""
+        return row[i]
+
     def lookup_col(self, col_name: str) -> int:
         '''
         Find column index by name
