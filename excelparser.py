@@ -1,11 +1,5 @@
 from genericpath import exists
-from typing import Callable
 import pandas
-
-isdebug = False
-def debug(callback: Callable[[], str]):
-    if isdebug: print("[debug] " + callback())
-
 
 class ExcelParser():
 
@@ -18,6 +12,8 @@ class ExcelParser():
     def append_row(self, row: list[any]):
         '''
         Append row
+
+        If the len of row is less than len of columns, the remaining is filled with empty string
         '''
         diff = len(self.cols) - len(row)
         if diff > 0:
@@ -65,7 +61,7 @@ class ExcelParser():
         '''
         return len(self.rows)
 
-    def getcol(self, col_name: str, row_idx: int) -> str:
+    def get_col(self, col_name: str, row_idx: int) -> str:
         '''
         Get column value for the row
         '''
@@ -73,21 +69,41 @@ class ExcelParser():
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
 
+    def collect_col(self, col_name: str) -> set[str]:
+        '''
+        Collect all values of the column to a set
+        '''
+        return set(self.flatten_col(col_name))
+
     def filter_rows(self, filter):
+        '''
+        filter rows
+
+        filter is a function that take a rows (list[str]) and return boolean, a row is filtered if it returns False
+        '''
         newrow: list[list[any]] = []
         for r in self.rows:
             if not filter(r): newrow.append(r)
         self.rows = newrow
 
-    def appendcol(self, col_name: str):
+    def append_cols(self, col_names: list[str]):
         '''
-        Append a new column at the end
+        Append new columns at the end
         '''
-        self.appendcolval(col_name, lambda : "")
+        for c in col_names:
+            self.append_col(c)
 
-    def appendcolval(self, col_name: str, value_supplier):
+    def append_col(self, col_name: str):
         '''
         Append a new column at the end
+        '''
+        self.append_col_val(col_name, lambda : "")
+
+    def append_col_val(self, col_name: str, value_supplier):
+        '''
+        Append a new column at the end
+
+        value_supplier is a function that returns random value
         '''
         self.cols.append(col_name)
         self.cols_idx[col_name] = len(self.cols) - 1
@@ -114,6 +130,25 @@ class ExcelParser():
             if i < len(self.rows) - 1:
                 joined += delimiter
         return joined
+
+    def group_distinct(self, col_name: str) -> dict[str]:
+        '''
+        Group rows by distinct column value
+
+        key: column value
+        value: row index
+        '''
+        grouped: dict[str][int] = {}
+        idx = self.lookup_col(col_name)
+        if idx == -1:
+            raise ValueError(f"Column {col_name} is not found")
+
+        for i in range(len(self.rows)):
+            k = self.rows[i][idx]
+            grouped[k] = i
+
+        return grouped
+
 
     def group_and_sum(self, col_name: str, summed_col: str) -> dict[str]:
         '''
@@ -231,7 +266,6 @@ class ExcelParser():
         '''
         ip: str = self.inputf
         if ip == None: raise ValueError("Please specify input file")
-        debug(lambda: f"input path: '{ip}'")
 
         # read and parse workbook
         if not exists(ip): raise ValueError(f"Input file '{ip}' not found")
@@ -242,7 +276,6 @@ class ExcelParser():
 
         nrow = len(df)
         ncol = len(df.columns)
-        debug(lambda: f"row count: {nrow}, col count: {ncol}")
 
         # columns
         cols = []
@@ -259,14 +292,6 @@ class ExcelParser():
             self.cols_idx[sh] = cols_i
             cols_i += 1
 
-        if isdebug:
-            s = "Columns: "
-            for i in range(len(cols)):
-                s += f"[{i}] {cols[i]}"
-                if i < len(cols) - 1:
-                    s += ", "
-            debug(lambda: s)
-
         # rows
         rows: list[list[str]] = []
         for i in range(nrow):
@@ -278,7 +303,6 @@ class ExcelParser():
                 r.append(v.strip())
 
             rows.append(r)
-            debug(lambda: f"row[{i}]: {r}")
 
         self.cols = cols
         self.rows = rows
@@ -292,6 +316,34 @@ class ExcelParser():
             s += "\n" + str(self.rows[i])
         return s
 
+    # -------------------- deprecated stuff -----------------
+
+    def getcol(self, col_name: str, row_idx: int) -> str:
+        '''
+        deprecated, use get_col instead
+        '''
+        return self.get_col(col_name, row_idx)
+
+    def appendcols(self, col_names: list[str]):
+        '''
+        deprecated, use append_cols instead
+        '''
+        self.append_cols(col_names)
+
+    def appendcol(self, col_name: str):
+        '''
+        deprecated, use appendcol instead
+        '''
+        self.append_col(col_name)
+
+    def appendcolval(self, col_name: str, value_supplier):
+        '''
+        deprecated, use append_col_val instead
+        '''
+        self.append_col_val(col_name, value_supplier)
+
+    # -------------------- deprecated stuff -----------------
+
 def quote_each(l: list[str]) -> list[str]:
     return [quote(v) for v in l]
 
@@ -299,4 +351,15 @@ def quote(s: str) -> str:
     return "'" + s + "'"
 
 def parse(f: str) -> ExcelParser:
+    '''
+    Same as ExcelParser(f).parse()
+    '''
     return ExcelParser(f).parse()
+
+def empty_parser(*col: str) -> ExcelParser:
+    '''
+    Create empty ExcelParser with provided columns
+    '''
+    p = ExcelParser()
+    p.append_cols(col)
+    return p
