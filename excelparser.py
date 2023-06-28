@@ -192,7 +192,7 @@ class ExcelParser():
             sum += v
         return sum
 
-    def row_lookup_col(self, col_name: str, row: list[str]) -> str:
+    def row_get_col(self, col_name: str, row: list[str]) -> str:
         '''
         Find column value in row by name
         '''
@@ -204,12 +204,10 @@ class ExcelParser():
         '''
         Find column index by name
         '''
-        if col_name not in self.cols_idx:
-            return -1
-
+        if col_name not in self.cols_idx: return -1
         return self.cols_idx[col_name]
 
-    def cvt_col_name(self, col_name: int, converter):
+    def cvt_col(self, col_name: str, converter):
         '''
         Convert column value
         '''
@@ -284,8 +282,7 @@ class ExcelParser():
 
         for i in range(ncol):
             h = df.columns[i]
-            if not h:
-                break
+            if not h: break
 
             sh = str(h).strip()
             cols.append(sh)
@@ -298,8 +295,7 @@ class ExcelParser():
             r = []
             for j in range(ncol):
                 v = df.iat[i, j]
-                if pandas.isnull(v):
-                    v = ""
+                if pandas.isnull(v): v = ""
                 r.append(v.strip())
 
             rows.append(r)
@@ -316,7 +312,7 @@ class ExcelParser():
             s += "\n" + str(self.rows[i])
         return s
 
-    # -------------------- deprecated stuff -----------------
+    # >>>>>>>>>>>>>>>>>>>> deprecated stuff >>>>>>>>>>>>>>>>>
 
     def getcol(self, col_name: str, row_idx: int) -> str:
         '''
@@ -342,7 +338,19 @@ class ExcelParser():
         '''
         self.append_col_val(col_name, value_supplier)
 
-    # -------------------- deprecated stuff -----------------
+    def cvt_col_name(self, col_name: str, converter):
+        '''
+        deprecated, use cvt_col instead
+        '''
+        return self.cvt_col(col_name, converter)
+
+    def row_lookup_col(self, col_name: str, row: list[str]) -> str:
+        '''
+        deprecated, use row_get_col instead
+        '''
+        return self.row_get_col(col_name, row)
+
+    # <<<<<<<<<<<<<<<<<<<< deprecated stuff <<<<<<<<<<<<<<<<<
 
 def quote_each(l: list[str]) -> list[str]:
     return [quote(v) for v in l]

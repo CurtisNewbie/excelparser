@@ -17,7 +17,7 @@ ep.cvt_col_name('amount', lambda x: 0 if x == "" else float(x) * 1000)
 
 # read value at column 'amount'
 for i in range(ep.row_count()):
-    amt = ep.getcol('amount', i)
+    amt = ep.get_col('amount', i)
     print(f"row: {i}, amt: {amt}")
 
 # make copy of the selected columns
