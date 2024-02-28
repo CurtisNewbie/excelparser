@@ -1,6 +1,28 @@
 from genericpath import exists
 import pandas
 
+class RowIter():
+    def __init__(self, p: "ExcelParser"):
+        self.i = -1
+        self.p = p
+
+    def __next__(self):
+        self.i += 1
+        if self.i < len(self.p.rows):
+            return Row(self.i, self.p)
+        raise StopIteration
+
+class Row:
+    def __init__(self, i: int, p: "ExcelParser"):
+        self.i = i
+        self.p = p
+
+    def get_col(self, col_name: str):
+        return self.p.get_col(col_name, self.i)
+
+    def get_col_at(self, idx: int):
+        return self.p.get_col_at(idx, self.i)
+
 class ExcelParser():
 
     def __init__(self, inputf=None) -> None:
@@ -8,6 +30,9 @@ class ExcelParser():
         self.cols: list[str] = []
         self.rows: list[list[any]] = []
         self.cols_idx: dict[str][int] = {}
+
+    def __iter__(self):
+        return RowIter(self)
 
     def append_row(self, row: list[any]):
         '''
@@ -68,6 +93,12 @@ class ExcelParser():
         colidx = self.lookup_col(col_name)
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
+
+    def get_col_at(self, idx: int, row_idx: int) -> str:
+        '''
+        Get column value for the row at specific column
+        '''
+        return self.rows[row_idx][idx]
 
     def collect_col(self, col_name: str) -> set[str]:
         '''
