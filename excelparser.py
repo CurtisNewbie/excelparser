@@ -94,6 +94,10 @@ class ExcelParser():
         if colidx == -1: return ""
         return self.rows[row_idx][colidx]
 
+    def fuzz_find_col(self, search: str) -> str:
+        for c in self.cols:
+            if search in c: return c
+
     def get_col_at(self, idx: int, row_idx: int) -> str:
         '''
         Get column value for the row at specific column
