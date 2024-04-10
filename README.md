@@ -4,6 +4,12 @@ Simple excel parser written in python, it's essentially a wrapper of Panda, open
 
 To install it, simply run `python3 -m pip install .`.
 
+e.g.,
+
+```sh
+python3 -m pip install . -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 Or you can use:
 
 ```sh
