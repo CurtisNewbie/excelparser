@@ -304,7 +304,7 @@ class ExcelParser():
         if not exists(ip): raise ValueError(f"Input file '{ip}' not found")
 
         df: pandas.DataFrame
-        if ip.lower().endswith('.csv'): df = pandas.read_csv(ip, 0, dtype="string")
+        if ip.lower().endswith('.csv'): df = pandas.read_csv(ip, dtype="string")
         else: df = pandas.read_excel(ip, 0, dtype="string")
 
         nrow = len(df)
