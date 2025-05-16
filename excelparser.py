@@ -263,6 +263,8 @@ class ExcelParser():
         '''
         Copy columns
         '''
+        if not copied_names:
+            copied_names = self.cols
         colnames = []
         idxls: list[int] = []
 
@@ -275,7 +277,7 @@ class ExcelParser():
         ep = ExcelParser()
         if len(idxls) > 0:
             ep.rows = []
-            ep.cols = colnames
+            ep.append_cols(colnames)
 
             for i in range(len(self.rows)):
                 r: list = self.rows[i]
