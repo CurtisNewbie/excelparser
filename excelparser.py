@@ -291,7 +291,10 @@ class ExcelParser():
         Export to file
         '''
         df = pandas.DataFrame(self.rows, columns=self.cols)
-        df.to_excel(outf, index=False)
+        if outf.endswith(".csv"):
+            df.to_csv(outf, index=False)
+        else:
+            df.to_excel(outf, index=False)
 
     def parse(self) -> "ExcelParser":
         '''
